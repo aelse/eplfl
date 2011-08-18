@@ -21,6 +21,22 @@ class LeagueWeek(object):
     def add_team(self, team):
         self.teams.append(team)
 
+    def get_team_ids(self):
+        vals = [x.tid for x in self.teams]
+        return vals
+
+    def get_team_names(self):
+        vals = [x.name for x in self.teams]
+        return vals
+
+    def get_manager_names(self):
+        vals = [x.manager for x in self.teams]
+        return vals
+
+    def get_gameweek_points(self):
+        vals = [x.gw_score for x in self.teams]
+        return vals
+
 
 class TeamWeek(object):
     """Team data for a particular game week"""
