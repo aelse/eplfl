@@ -1,58 +1,44 @@
 import eplfl
 import cairo
-import pycha.bar
+from pychartdir import *
 from pprint import PrettyPrinter
 
 def graph_gameweek_by_team(league_data):
+    points = league_data.get_gameweek_points()
     team_names = league_data.get_team_names()
     managers = league_data.get_manager_names()
-    points = league_data.get_gameweek_points()
+    labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
     title = 'Gameweek %d' % league_data.gameweek
 
-    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 800, 400)
+    colours = ['0xcc0000' for x in points]
 
-    dataSet = (
-        ('points', [(i, l) for i, l in enumerate(points)]),
-        )
+    create_bar_chart('output.png', title, points, labels, colours)
 
-    options = {
-        'axis': {
-            'x': {
-                'ticks': [dict(v=i, label="%s - %s" % (l, managers[i])) for i, l in enumerate(team_names)],
-                'label': 'Team',
-                'rotate': 25,
-            },
-            'y': {
-                'tickCount': 4,
-                'rotate': 25,
-                'label': 'Points'
-            }
-        },
-        'background': {
-            'chartColor': '#ffeeff',
-            'baseColor': '#ffffff',
-            'lineColor': '#444444'
-        },
-        'colorScheme': {
-            'name': 'gradient',
-            'args': {
-                'initialColor': '#ffdf4d',
-            },
-        },
-        'legend': {
-            'hide': True,
-        },
-        'padding': {
-            'left': 100,
-            'right': 100,
-            'bottom': 100,
-        },
-        'title': title,
-    }
-    chart = pycha.bar.VerticalBarChart(surface, options)
-    chart.addDataset(dataSet)
-    chart.render()
-    surface.write_to_png('output.png')
+def graph_points_total(league_data):
+    points = league_data.get_total_score()
+    team_names = league_data.get_team_names()
+    managers = league_data.get_manager_names()
+    labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    title = 'Points Total at Gameweek %d' % league_data.gameweek
+
+    colours = ['0x0000cc' for x in points]
+
+    create_bar_chart('total.png', title, points, labels, colours)
+
+
+
+def create_bar_chart(filename, title, values, labels, colours):
+    c = XYChart(800, 400, '0xffffff', '0x000000', 1)
+
+    #c.setPlotArea(100, 20, 600, 300)
+    c.setPlotArea(100, 20, 600, 300, '0xffffff', -1, -1, '0xdddddd')
+    #c.setPlotArea(100, 20, 600, 300, '0xffffff', -1, -1, '0xcccccc', '0xcccccc')
+    c.addBarLayer3(values, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
+    c.xAxis().setLabels(labels).setFontAngle(-25)
+    c.addTitle(title, "FreeSans.ttf", 10)
+    c.makeChart(filename)
+
+    #'initialColor': '#ffdf4d',
 
 
 def get_league_data(league_id):
@@ -78,6 +64,4 @@ if __name__ == "__main__":
     league_data = get_league_data(my_league_id)
     teams = league_data.get_team_names()
     graph_gameweek_by_team(league_data)
-
-    pp = PrettyPrinter()
-    pp.pprint(teams)
+    graph_points_total(league_data)
