@@ -1,7 +1,18 @@
 from BeautifulSoup import BeautifulSoup
 import re
 from urllib import urlopen
+import string
 from pprint import PrettyPrinter
+
+class League(object):
+    """Information about a league"""
+
+    def __init__(self, lid):
+        self.lid = int(lid)
+
+        league_url = "http://fantasy.premierleague.com/my-leagues/%d/standings/"
+        html = fetch_data(league_url % self.lid)
+        soup = make_soup(html)
 
 class LeagueWeek(object):
     """All data for a league for a particular week"""
@@ -40,6 +51,29 @@ class LeagueWeek(object):
     def get_total_score(self):
         vals = [x.total_score for x in self.teams]
         return vals
+
+
+class Team(object):
+    """Information about a team"""
+
+    def __init__(self, tid):
+        league_url = "http://fantasy.premierleague.com/entry/%d/event-history/1/"
+        html = fetch_data(league_url % self.tid)
+        soup = make_soup(html)
+
+        self.name = soup.find("h2", {"class": "ismSection3"}).contents
+        self.manager = soup.find("h1", {"class": "ismSection2"}).contents
+
+        # find the kit colours
+        kit = soup.find("input", {"id": "id_edit_entry_form-kit"})
+        shirt_type = re.search("ismShirtType\":\"([^\"]+)\"", str(kit)).groups()[0]
+        second_colour = re.search("ismShirt%sColor\":\"([^\"]+)\"" % string.capitalize(re.sub("s$", "", shirt_type)), str(kit)).groups()[0]
+
+        self.tid = tid
+        self.name = name
+        self.manager = manager
+        self.colour = second_colour
+
 
 
 class TeamWeek(object):
