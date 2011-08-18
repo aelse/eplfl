@@ -37,6 +37,10 @@ class LeagueWeek(object):
         vals = [x.gw_score for x in self.teams]
         return vals
 
+    def get_total_score(self):
+        vals = [x.total_score for x in self.teams]
+        return vals
+
 
 class TeamWeek(object):
     """Team data for a particular game week"""
