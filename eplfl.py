@@ -54,10 +54,10 @@ class LeagueStanding(object):
         self.team_standings = get_team_standings(league, soup)
 
     def __str__(self):
-        return '%d %s gw%d' % (self.lid, self.name, self.gameweek)
+        return '%d %s gw%d' % (self.league.lid, self.league.name, self.gameweek)
 
     def __repr__(self):
-        return '%s => ' % str(self) + ':'.join([str(x) for x in self.teams])
+        return '%s => ' % str(self) + ':'.join([str(x) for x in self.team_standings])
 
     def add_team(self, team):
         self.teams.append(team)
@@ -86,7 +86,8 @@ class LeagueStanding(object):
 class Team(object):
     """Information about a team"""
 
-    def __init__(self, soup, tid):
+    def __init__(self, tid):
+        self.tid = tid
         league_url = "http://fantasy.premierleague.com/entry/%d/event-history/1/"
         html = fetch_data(league_url % self.tid)
         soup = make_soup(html)
@@ -96,13 +97,12 @@ class Team(object):
 
         # find the kit colours
         kit = soup.find("input", {"id": "id_edit_entry_form-kit"})
-        shirt_type = re.search("ismShirtType\":\"([^\"]+)\"", str(kit)).groups()[0]
-        second_colour = re.search("ismShirt%sColor\":\"([^\"]+)\"" % string.capitalize(re.sub("s$", "", shirt_type)), str(kit)).groups()[0]
-
-        self.tid = tid
-        self.name = name
-        self.manager = manager
-        self.colour = second_colour
+        try:
+            shirt_type = re.search("ismShirtType\":\"([^\"]+)\"", str(kit)).groups()[0]
+            second_colour = re.search("ismShirt%sColor\":\"([^\"]+)\"" % string.capitalize(re.sub("s$", "", shirt_type)), str(kit)).groups()[0]
+            self.colour = second_colour
+        except:
+            self.colour = "#333333"
 
 
 class TeamStanding(object):
@@ -161,19 +161,20 @@ def get_team_standing(team, tds):
 
 
 def get_team_standings(league, soup):
-    indexed_teams = map(lambda x: {x['tid']: x}, league.teams)
+    indexed_teams = dict(map(lambda x: (x.tid, x), league.teams))
 
     table = soup.find("table", {"class": "ismTable ismStandingsTable"})
     rows = table.findAll("tr")
     # skip table header
     rows = rows[1:]
 
+    league_data = []
     for row in rows:
         tds = row.findAll("td")
         m = re.search("href=\"\/entry\/(\d+)\/", str(tds[2]))
-        team_id = int(m.groups[0])
+        team_id = int(m.groups()[0])
         team_standing = get_team_standing(indexed_teams[team_id], tds)
-        league_data.add_team(team_standing)
+        league_data.append(team_standing)
 
     return sorted(league_data, key=lambda x: x.team.tid)
 
