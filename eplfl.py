@@ -63,15 +63,15 @@ class LeagueStanding(object):
         self.teams.append(team)
 
     def get_team_ids(self):
-        vals = [x.tid for x in self.teams]
+        vals = [x.tid for x in self.league.teams]
         return vals
 
     def get_team_names(self):
-        vals = [x.name for x in self.teams]
+        vals = [x.name for x in self.league.teams]
         return vals
 
     def get_manager_names(self):
-        vals = [x.manager for x in self.team_standings]
+        vals = [x.manager for x in self.league.teams]
         return vals
 
     def get_gameweek_points(self):
@@ -92,8 +92,8 @@ class Team(object):
         html = fetch_data(league_url % self.tid)
         soup = make_soup(html)
 
-        self.name = soup.find("h2", {"class": "ismSection3"}).contents
-        self.manager = soup.find("h1", {"class": "ismSection2"}).contents
+        self.name = soup.find("h2", {"class": "ismSection3"}).contents[0]
+        self.manager = soup.find("h1", {"class": "ismSection2"}).contents[0]
 
         # find the kit colours
         kit = soup.find("input", {"id": "id_edit_entry_form-kit"})
