@@ -1,6 +1,8 @@
 import eplfl
 import cairo
 import operator
+import csv
+import sys
 from pychartdir import *
 from pprint import PrettyPrinter
 
@@ -23,7 +25,7 @@ def graph_gameweek_by_team(standing):
     c.makeChart('gameweek_by_team.png')
 
 
-def graph_points_total(standing):
+def graph_points_total_at_gameweek(standing):
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
     labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
@@ -68,11 +70,66 @@ def chart_boilerplate(title, labels):
     l.setFontAngle(-25)
     l.setFontStyle("Numans-Regular.ttf")
     l.setPos(l.getLeftX() - 25, l.getTopY())
-    c.addTitle(title, "Novecentowide-Normal.otf", 20)
+    #c.addTitle(title, "Novecentowide-Normal.otf", 20)
+    c.addTitle(title, "Avenir LT 65 Medium.ttf", 20)
 
     return c
 
     #'initialColor': '#ffdf4d',
+
+def load_points_history(filename):
+    points_history = {}
+    try:
+        f = open(filename, 'rb')
+        r = csv.reader(f, delimiter=',', quotechar='"')
+        for row in r:
+            data = row # row not iterable
+            data = map(lambda x: int(x), data)
+            tid = data[0]
+            points = data[1:]
+            points_history[tid] = points
+        f.close()
+    except:
+        # If points file can't be accessed, bail out to avoid
+        # potentially destructive operation when it is overwritten
+        print 'Could not read %s' % filename
+        print 'Please \'touch %s\' and run this script again' % filename
+        sys.exit(1)
+
+    return points_history
+
+
+def write_points_history(filename, points):
+    # convert dictionary into a list with key as first element
+    flat_history = []
+    for k, p in points.items():
+        flat_history.append([k] + p)
+
+    try:
+        f = open(filename, 'wb')
+        w = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        for row in flat_history:
+            w.writerow(row)
+        f.close()
+    except:
+        print 'Could not write %s' % filename
+
+
+def update_points_history(gameweek, points):
+    savefile = 'points_history.csv'
+    history = load_points_history(savefile)
+
+    for k, p in points.items():
+        # May be a team we have not yet recorded
+        if not history.has_key(k):
+            history[k] = []
+        # May be some gameweeks with no recorded stats for a team
+        if len(history[k]) < gameweek:
+            history[k].extend([0] * (gameweek - len(history[k])))
+        # Update current gameweek points
+        history[k][gameweek - 1] = p
+
+    write_points_history(savefile, history)
 
 
 if __name__ == "__main__":
@@ -81,5 +138,8 @@ if __name__ == "__main__":
 
     league = eplfl.League(my_league_id)
     league_standing = eplfl.LeagueStanding(league)
+
+    update_points_history(league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_gameweek_points())))
+
     graph_gameweek_by_team(league_standing)
-    graph_points_total(league_standing)
+    graph_points_total_at_gameweek(league_standing)
