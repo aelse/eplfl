@@ -4,6 +4,26 @@ from urllib import urlopen
 import string
 from pprint import PrettyPrinter
 
+
+class FileMemCache:
+    """Non-persistent memory cache"""
+
+    def __init__(self):
+        self._filecache = {}
+
+    def has_key(self, key):
+        return self._filecache.has_key(key)
+
+    def fetch(self, key):
+        return self._filecache[key]
+
+    def set(self, key, value):
+        self._filecache[key] = value
+
+# Create a global cache object
+filememcache = FileMemCache()
+
+
 class League(object):
     """Information about a league"""
 
@@ -170,7 +190,23 @@ def fetch_data(url):
     #if code != 200:
     #    html = 'Failed to fetch url: %d' % code
 
-    html = urlopen(url).read()
+    from md5 import md5
+    cachefile = 'cache/%s' % md5(url).hexdigest()
+
+    if filememcache.has_key(cachefile):
+        print 'fetched %s from filememcache' % cachefile
+        return filememcache.fetch(cachefile)
+
+    try:
+        html = open(cachefile, 'r').read()
+        print 'fetched from cache %s' % cachefile
+    except:
+        print 'fetching %s' % url
+        html = urlopen(url).read()
+        open(cachefile, 'w').write(html)
+
+    filememcache.set(cachefile, html)
+
     return html
 
 
