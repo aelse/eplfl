@@ -16,11 +16,12 @@ def graph_gameweek_by_team(standing):
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
     labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    y_label = "Points"
     title = 'Gameweek %d' % standing.gameweek
 
     colours = [colour_safe for x in points]
 
-    c = chart_boilerplate(title, labels)
+    c = chart_boilerplate(title, labels, y_label)
     c.addBarLayer3(points, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
     c.makeChart('gameweek_by_team.png')
 
@@ -29,6 +30,7 @@ def graph_points_total_at_gameweek(standing):
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
     labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    y_label = "Points"
     title = 'Points Total at Gameweek %d' % standing.gameweek
 
     # Work out the top and bottom 3 teams
@@ -56,22 +58,53 @@ def graph_points_total_at_gameweek(standing):
         dataX.append(team_order[tid])
         dataY.append(point_map[tid] - 5)
 
+    c = chart_boilerplate(title, labels, y_label)
+    c.addScatterLayer(dataX, dataY).getDataSet(0).setDataSymbol2(steak_image)
+    c.addBarLayer3(points, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
+    c.makeChart('total_by_team.png')
+
+
+def graph_points_total_history(standing):
+    # number of weeks the game runs for
+    num_weeks = 38
+
+    team_names = standing.get_team_names()
+    managers = standing.get_manager_names()
+    labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    title = 'Points History'
+
+    team_ids = [x.tid for x in standing.league.teams]
+    points = standing.get_total_score()
+    point_map = dict(zip(team_ids, points))
+
+    colours = [colour_safe for x in team_ids]
+
+    # Lucky members of the steak zone get a steak icon on their bar
+    dataX = []
+    dataY = []
+    for tid in bottom3:
+        dataX.append(team_order[tid])
+        dataY.append(point_map[tid] - 5)
+
     c = chart_boilerplate(title, labels)
     c.addScatterLayer(dataX, dataY).getDataSet(0).setDataSymbol2(steak_image)
     c.addBarLayer3(points, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
     c.makeChart('total_by_team.png')
 
 
-def chart_boilerplate(title, labels):
+def chart_boilerplate(title, labels, y_label):
+    label_font = "Numans-Regular.ttf"
+    title_font = "Avenir LT 65 Medium.ttf"
+
     c = XYChart(900, 450, '0xffffff', '0x000000', 1)
 
     c.setPlotArea(50, 50, 800, 300, '0xffffff', -1, -1, '0xdddddd')
     l = c.xAxis().setLabels(labels)
     l.setFontAngle(-25)
-    l.setFontStyle("Numans-Regular.ttf")
+    l.setFontStyle(label_font)
     l.setPos(l.getLeftX() - 25, l.getTopY())
-    #c.addTitle(title, "Novecentowide-Normal.otf", 20)
-    c.addTitle(title, "Avenir LT 65 Medium.ttf", 20)
+    c.addTitle(title, title_font, 20)
+    c.yAxis().setTitle(y_label)
 
     return c
 
@@ -116,7 +149,7 @@ def write_points_history(filename, points):
 
 
 def update_points_history(gameweek, points):
-    savefile = 'points_history.csv'
+    savefile = 'data/points_history.csv'
     history = load_points_history(savefile)
 
     for k, p in points.items():
