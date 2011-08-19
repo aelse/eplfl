@@ -4,6 +4,11 @@ import operator
 from pychartdir import *
 from pprint import PrettyPrinter
 
+colour_win   = "0x00cc00"
+colour_safe  = "0x0000cc"
+colour_steak = "0xcc0000"
+steak_image  = "steak.png" # image from iconshock.com, free for personal use
+
 def graph_gameweek_by_team(standing):
     points = standing.get_gameweek_points()
     team_names = standing.get_team_names()
@@ -11,9 +16,11 @@ def graph_gameweek_by_team(standing):
     labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
     title = 'Gameweek %d' % standing.gameweek
 
-    colours = ['0xcc0000' for x in points]
+    colours = [colour_safe for x in points]
 
-    create_bar_chart('gameweek_by_team.png', title, points, labels, colours)
+    c = chart_boilerplate(title, labels)
+    c.addBarLayer3(points, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
+    c.makeChart('gameweek_by_team.png')
 
 
 def graph_points_total(standing):
@@ -33,23 +40,34 @@ def graph_points_total(standing):
 
     # The top 3 teams are in the winner zone, bottom 3 in the steak zone
     team_order = dict(zip(team_ids, range(0,len(team_ids))))
-    colours = ['0x0000cc' for x in team_ids]
+    colours = [colour_safe for x in team_ids]
+    #'initialColor': '#ffdf4d',
     for tid in bottom3:
-        colours[team_order[tid]] = '0xcc0000'
+        colours[team_order[tid]] = colour_steak
     for tid in top3:
-        colours[team_order[tid]] = '0x00cc00'
+        colours[team_order[tid]] = colour_win
 
-    create_bar_chart('total_by_team.png', title, points, labels, colours)
+    # Lucky members of the steak zone get a steak icon on their bar
+    dataX = []
+    dataY = []
+    for tid in bottom3:
+        dataX.append(team_order[tid])
+        dataY.append(point_map[tid] - 5)
+
+    c = chart_boilerplate(title, labels)
+    c.addScatterLayer(dataX, dataY).getDataSet(0).setDataSymbol2(steak_image)
+    c.addBarLayer3(points, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
+    c.makeChart('total_by_team.png')
 
 
-def create_bar_chart(filename, title, values, labels, colours):
+def chart_boilerplate(title, labels):
     c = XYChart(900, 450, '0xffffff', '0x000000', 1)
 
     c.setPlotArea(50, 50, 800, 300, '0xffffff', -1, -1, '0xdddddd')
-    c.addBarLayer3(values, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
     c.xAxis().setLabels(labels).setFontAngle(-25)
-    c.addTitle(title, "FreeSans.ttf", 10)
-    c.makeChart(filename)
+    c.addTitle(title, "FreeSans.ttf", 20)
+
+    return c
 
     #'initialColor': '#ffdf4d',
 
