@@ -195,14 +195,11 @@ def fetch_data(url):
     cachefile = 'cache/%s' % md5(url).hexdigest()
 
     if filememcache.has_key(cachefile):
-        print 'fetched %s from filememcache' % cachefile
         return filememcache.fetch(cachefile)
 
     try:
         html = open(cachefile, 'r').read()
-        print 'fetched from cache %s' % cachefile
     except:
-        print 'fetching %s' % url
         html = urlopen(url).read()
         open(cachefile, 'w').write(html)
 
