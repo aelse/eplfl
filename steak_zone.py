@@ -64,8 +64,11 @@ def chart_boilerplate(title, labels):
     c = XYChart(900, 450, '0xffffff', '0x000000', 1)
 
     c.setPlotArea(50, 50, 800, 300, '0xffffff', -1, -1, '0xdddddd')
-    c.xAxis().setLabels(labels).setFontAngle(-25)
-    c.addTitle(title, "FreeSans.ttf", 20)
+    l = c.xAxis().setLabels(labels)
+    l.setFontAngle(-25)
+    l.setFontStyle("Numans-Regular.ttf")
+    l.setPos(l.getLeftX() - 25, l.getTopY())
+    c.addTitle(title, "Novecentowide-Normal.otf", 20)
 
     return c
 
