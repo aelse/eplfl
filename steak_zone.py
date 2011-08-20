@@ -19,7 +19,7 @@ def graph_gameweek_by_team(standing):
     managers = standing.get_manager_names()
     labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
     y_label = "Points"
-    title = 'Gameweek %d' % standing.gameweek
+    title = 'Gameweek %d Accumulated Points' % standing.gameweek
 
     colours = [colour_safe for x in points]
 
