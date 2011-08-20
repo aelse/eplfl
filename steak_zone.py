@@ -10,6 +10,8 @@ colour_win   = "0x00cc00"
 colour_safe  = "0x0000cc"
 colour_steak = "0xcc0000"
 steak_image  = "steak.png" # image from iconshock.com, free for personal use
+label_font = "Numans-Regular.ttf"
+title_font = "Avenir LT 65 Medium.ttf"
 
 def graph_gameweek_by_team(standing):
     points = standing.get_gameweek_points()
@@ -45,7 +47,6 @@ def graph_points_total_at_gameweek(standing):
     # The top 3 teams are in the winner zone, bottom 3 in the steak zone
     team_order = dict(zip(team_ids, range(0,len(team_ids))))
     colours = [colour_safe for x in team_ids]
-    #'initialColor': '#ffdf4d',
     for tid in bottom3:
         colours[team_order[tid]] = colour_steak
     for tid in top3:
@@ -64,41 +65,39 @@ def graph_points_total_at_gameweek(standing):
     c.makeChart('total_by_team.png')
 
 
-def graph_points_total_history(standing):
+def graph_points_history(standing, history, title, filename):
     # number of weeks the game runs for
     num_weeks = 38
+    labels = [''] * 2 + ['%d' % x for x in range(1, num_weeks + 1)]
+    y_label = 'Points'
+    x_label = 'Gameweek'
 
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
-    labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
-    title = 'Points History'
+    line_labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    name_map = dict(zip(standing.get_team_ids(), team_names))
 
-    team_ids = [x.tid for x in standing.league.teams]
-    points = standing.get_total_score()
-    point_map = dict(zip(team_ids, points))
+    c = chart_boilerplate(title, labels, y_label)
+    c.xAxis().setTitle(x_label)
+    c.addLegend(50, 390, 0, label_font, 8).setBackground(Transparent)
 
-    colours = [colour_safe for x in team_ids]
+    layer = c.addLineLayer2()
+    for k in history.keys():
+        # Possible gaps in points data will have a value of 0, which we
+        # replace with NoValue so ChartDirector handles them nicely.
+        # We make the fair assumption that no team actually scored 0
+        # in a game week.
+        history[k] = [0] + map(lambda x: x if x else NoValue, history[k])
 
-    # Lucky members of the steak zone get a steak icon on their bar
-    dataX = []
-    dataY = []
-    for tid in bottom3:
-        dataX.append(team_order[tid])
-        dataY.append(point_map[tid] - 5)
+        layer.addDataSet(history[k], -1, name_map[k])
 
-    c = chart_boilerplate(title, labels)
-    c.addScatterLayer(dataX, dataY).getDataSet(0).setDataSymbol2(steak_image)
-    c.addBarLayer3(points, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
-    c.makeChart('total_by_team.png')
+    c.makeChart(filename)
 
 
 def chart_boilerplate(title, labels, y_label):
-    label_font = "Numans-Regular.ttf"
-    title_font = "Avenir LT 65 Medium.ttf"
-
     c = XYChart(900, 450, '0xffffff', '0x000000', 1)
 
-    c.setPlotArea(50, 50, 800, 300, '0xffffff', -1, -1, '0xdddddd')
+    c.setPlotArea(50, 50, 800, 300, '0xffffff', '0xf8f8f8', Transparent, c.dashLineColor('0xcccccc', DotLine), c.dashLineColor('0xcccccc', DotLine))
     l = c.xAxis().setLabels(labels)
     l.setFontAngle(-25)
     l.setFontStyle(label_font)
@@ -148,8 +147,7 @@ def write_points_history(filename, points):
         print 'Could not write %s' % filename
 
 
-def update_points_history(gameweek, points):
-    savefile = 'data/points_history.csv'
+def update_points_history(savefile, gameweek, points):
     history = load_points_history(savefile)
 
     for k, p in points.items():
@@ -172,7 +170,15 @@ if __name__ == "__main__":
     league = eplfl.League(my_league_id)
     league_standing = eplfl.LeagueStanding(league)
 
-    update_points_history(league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_gameweek_points())))
+    savefile = 'data/gameweek_points_history.csv'
+    update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_gameweek_points())))
+    history = load_points_history(savefile)
+    graph_points_history(league_standing, history, 'Gameweek Points History', 'gameweek_points_history.png')
+
+    savefile = 'data/total_points_history.csv'
+    update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_total_score())))
+    history = load_points_history(savefile)
+    graph_points_history(league_standing, history, 'Total Points History', 'total_points_history.png')
 
     graph_gameweek_by_team(league_standing)
     graph_points_total_at_gameweek(league_standing)
