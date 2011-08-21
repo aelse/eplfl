@@ -94,6 +94,7 @@ def graph_points_history(standing, history, title, filename):
     c.addLegend(50, 390, 0, label_font, 8).setBackground(Transparent)
 
     layer = c.addLineLayer2()
+    layer.setLineWidth(2)
     for k in history.keys():
         # Possible gaps in points data will have a value of 0, which we
         # replace with NoValue so ChartDirector handles them nicely.
@@ -127,6 +128,7 @@ def graph_rank_history(standing, history, title, filename):
     c.addLegend(50, 390, 0, label_font, 8).setBackground(Transparent)
 
     layer = c.addLineLayer2()
+    layer.setLineWidth(2)
     for k in history.keys():
         # Possible gaps in points data will have a value of 0, which we
         # replace with NoValue so ChartDirector handles them nicely.
