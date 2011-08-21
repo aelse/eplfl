@@ -180,5 +180,8 @@ if __name__ == "__main__":
     history = load_points_history(savefile)
     graph_points_history(league_standing, history, 'Total Points History', 'total_points_history.png')
 
+    savefile = 'data/rank_history.csv'
+    update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_league_ranks())))
+
     graph_gameweek_by_team(league_standing)
     graph_points_total_at_gameweek(league_standing)

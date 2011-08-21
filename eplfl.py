@@ -82,6 +82,10 @@ class LeagueStanding(object):
         vals = [x.total_score for x in self.team_standings]
         return vals
 
+    def get_league_ranks(self):
+        vals = [x.league_rank for x in self.team_standings]
+        return vals
+
 
 class Team(object):
     """Information about a team"""
