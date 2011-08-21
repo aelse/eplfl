@@ -106,6 +106,39 @@ def graph_points_history(standing, history, title, filename):
     c.makeChart(filename)
 
 
+def graph_rank_history(standing, history, title, filename):
+    # number of weeks the game runs for
+    num_weeks = 38
+    labels = [''] * 2 + ['%d' % x for x in range(1, num_weeks + 1)]
+    y_label = 'Rank'
+    x_label = 'Gameweek'
+
+    team_names = standing.get_team_names()
+    managers = standing.get_manager_names()
+    line_labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    name_map = dict(zip(standing.get_team_ids(), team_names))
+
+    num_teams = len(team_names)
+    yaxis_labels = map(lambda x: '%d' % (num_teams - x), range(0, num_teams))
+
+    c = chart_boilerplate(title, labels, y_label)
+    c.xAxis().setTitle(x_label)
+    l = c.yAxis().setLabels(yaxis_labels)
+    c.addLegend(50, 390, 0, label_font, 8).setBackground(Transparent)
+
+    layer = c.addLineLayer2()
+    for k in history.keys():
+        # Possible gaps in points data will have a value of 0, which we
+        # replace with NoValue so ChartDirector handles them nicely.
+        # Every team must have had a rank in each week.
+        # Reverse ordering of team rank. Number one is best, display at top
+        history[k] = [0] + map(lambda x: num_teams - x if x else NoValue, history[k])
+
+        layer.addDataSet(history[k], -1, name_map[k])
+
+    c.makeChart(filename)
+
+
 def chart_boilerplate(title, labels, y_label):
     c = XYChart(900, 450, '0xffffff', '0x000000', 1)
 
@@ -194,6 +227,8 @@ if __name__ == "__main__":
 
     savefile = 'data/rank_history.csv'
     update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_league_ranks())))
+    history = load_points_history(savefile)
+    graph_rank_history(league_standing, history, 'League Rank History', 'league_rank_history.png')
 
     graph_gameweek_by_team(league_standing)
     graph_points_total_at_gameweek(league_standing)
