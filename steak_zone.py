@@ -44,6 +44,18 @@ def graph_points_total_at_gameweek(standing):
     bottom3 = map(lambda x: x[0], low_to_high)[:3]
     top3 = map(lambda x: x[0], low_to_high)[-3:]
 
+    # There could be a tie for placing in the top or bottom 3. Resolve
+    # a tie by colouring all teams on equal points with the lowest/highest
+    # ranked team in each zone.
+    low_threshold = point_map[bottom3[2]]
+    top_threshold = point_map[top3[0]]
+
+    for (tid, pts) in point_map.items():
+        if pts == low_threshold:
+            bottom3 = bottom3 + [tid]
+        if pts == top_threshold:
+            top3 = top3 + [tid]
+
     # The top 3 teams are in the winner zone, bottom 3 in the steak zone
     team_order = dict(zip(team_ids, range(0,len(team_ids))))
     colours = [colour_safe for x in team_ids]
