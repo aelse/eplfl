@@ -119,7 +119,7 @@ def graph_rank_history(standing, history, title, filename):
     name_map = dict(zip(standing.get_team_ids(), team_names))
 
     num_teams = len(team_names)
-    yaxis_labels = map(lambda x: '%d' % (num_teams - x), range(0, num_teams))
+    yaxis_labels = [''] + map(lambda x: '%d' % (num_teams - x), range(0, num_teams))
 
     c = chart_boilerplate(title, labels, y_label)
     c.xAxis().setTitle(x_label)
@@ -132,7 +132,7 @@ def graph_rank_history(standing, history, title, filename):
         # replace with NoValue so ChartDirector handles them nicely.
         # Every team must have had a rank in each week.
         # Reverse ordering of team rank. Number one is best, display at top
-        history[k] = [0] + map(lambda x: num_teams - x if x else NoValue, history[k])
+        history[k] = [0] + map(lambda x: num_teams - x + 1 if x else NoValue, history[k])
 
         layer.addDataSet(history[k], -1, name_map[k])
 
