@@ -1,10 +1,8 @@
 import eplfl
-import cairo
 import operator
 import csv
 import sys
 from pychartdir import *
-from pprint import PrettyPrinter
 
 colour_win   = "0x00cc00"
 colour_safe  = "0x0000cc"
