@@ -215,17 +215,17 @@ if __name__ == "__main__":
     league = eplfl.League(my_league_id)
     league_standing = eplfl.LeagueStanding(league)
 
-    savefile = 'data/gameweek_points_history.csv'
+    savefile = 'data/%d_gameweek_points_history.csv' % my_league_id
     update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_gameweek_points())))
     history = load_points_history(savefile)
     graph_points_history(league_standing, history, 'Gameweek Points History', 'gameweek_points_history.png')
 
-    savefile = 'data/total_points_history.csv'
+    savefile = 'data/%d_total_points_history.csv' % my_league_id
     update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_total_score())))
     history = load_points_history(savefile)
     graph_points_history(league_standing, history, 'Total Points History', 'total_points_history.png')
 
-    savefile = 'data/rank_history.csv'
+    savefile = 'data/%d_rank_history.csv' % my_league_id
     update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_league_ranks())))
     history = load_points_history(savefile)
     graph_rank_history(league_standing, history, 'League Rank History', 'league_rank_history.png')
