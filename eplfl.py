@@ -27,7 +27,7 @@ filememcache = FileMemCache()
 class League(object):
     """Information about a league"""
 
-    def __init__(self, lid):
+    def __init__(self, lid, exclude_teams):
         self.lid = int(lid)
 
         league_url = "http://fantasy.premierleague.com/my-leagues/%d/standings/"
@@ -37,7 +37,7 @@ class League(object):
         n = soup.find("h2", {"class": "ismTabHeading"}).contents[0]
         self.name = re.sub(":\s*", "", n)
 
-        self.teams = get_teams(soup)
+        self.teams = get_teams(soup, exclude_teams)
 
 
 class LeagueStanding(object):
@@ -125,7 +125,7 @@ class TeamStanding(object):
         return 'tid: %d, gameweek score: %d, total score: %d, league rank: %d' % (self.team.tid, self.gw_score, self.total_score, self.league_rank)
 
 
-def get_teams(soup):
+def get_teams(soup, exclude_teams):
     """
     Retrieve a list of teams in a league.
 
@@ -147,8 +147,9 @@ def get_teams(soup):
         m = re.search("href=\"\/entry\/(\d+)\/", str(team_info))
         team_id = int(m.groups()[0])
 
-        team = Team(team_id)
-        teams.append(team)
+        if team_id not in exclude_teams:
+            team = Team(team_id)
+            teams.append(team)
 
     # Order team list by team id
     teams = sorted(teams, key=lambda x: x.tid)
@@ -177,8 +178,9 @@ def get_team_standings(league, soup):
         tds = row.findAll("td")
         m = re.search("href=\"\/entry\/(\d+)\/", str(tds[2]))
         team_id = int(m.groups()[0])
-        team_standing = get_team_standing(indexed_teams[team_id], tds)
-        league_data.append(team_standing)
+        if team_id in indexed_teams.keys():
+            team_standing = get_team_standing(indexed_teams[team_id], tds)
+            league_data.append(team_standing)
 
     return sorted(league_data, key=lambda x: x.team.tid)
 

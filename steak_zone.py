@@ -212,7 +212,9 @@ if __name__ == "__main__":
     """The Steak Zone league"""
     my_league_id = 52875
 
-    league = eplfl.League(my_league_id)
+    exclude_teams = [ 2593958, ]
+
+    league = eplfl.League(my_league_id, exclude_teams)
     league_standing = eplfl.LeagueStanding(league)
 
     savefile = 'data/%d_gameweek_points_history.csv' % my_league_id
