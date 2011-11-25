@@ -212,7 +212,7 @@ if __name__ == "__main__":
     """The Steak Zone league"""
     my_league_id = 52875
 
-    exclude_teams = [ 2593958, ]
+    exclude_teams = [ 2593958, 2633010, ]
 
     league = eplfl.League(my_league_id, exclude_teams)
     league_standing = eplfl.LeagueStanding(league)
