@@ -158,9 +158,9 @@ def get_teams(soup, exclude_teams):
 
 
 def get_team_standing(team, tds):
-    team_league_rank = tds[1].text
-    team_gw_score = tds[4].text
-    team_total_score = tds[5].text
+    team_league_rank = re.sub(',', '', tds[1].text)
+    team_gw_score = re.sub(',', '', tds[4].text)
+    team_total_score = re.sub(',', '', tds[5].text)
 
     return TeamStanding(team, team_gw_score, team_total_score, team_league_rank)
 
