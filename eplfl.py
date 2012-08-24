@@ -108,6 +108,12 @@ class Team(object):
         except:
             self.colour = "#333333"
 
+    def __repr__(self):
+        return 'Team(%d)' % self.tid
+
+    def __str__(self):
+        return '%s: %s' % (self.name, self.manager)
+
 
 class TeamStanding(object):
     """Team data for a particular game week"""
