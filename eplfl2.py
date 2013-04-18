@@ -66,6 +66,22 @@ class LeagueStanding(object):
         self._points_total_by_gameweek = None
         self._rank_history = None
 
+    def get_team_ids(self):
+        return [x.tid for x in self.league.teams]
+
+    def get_team_names(self):
+        return [x.name for x in self.league.teams]
+
+    def get_manager_names(self):
+        return [x.manager for x in self.league.teams]
+
+    def get_gameweek_points(self):
+        return [x.points_history[-1] for x in self.league.teams]
+
+    @property
+    def gameweek(self):
+        return len(self.points_history.items()[0][1])
+
     @property
     def points_history(self):
         if not self._points_history:
