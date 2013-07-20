@@ -40,7 +40,7 @@ class League(object):
                 teams.append(team)
 
         # Order team list by team id
-        self._teams = sorted(teams, key=lambda x: x.tid)
+        self._teams = sorted(teams, key=lambda x: x.id)
 
     def __repr__(self):
         return u"<League({0})>".format(self.id).encode('utf-8')
@@ -67,14 +67,14 @@ class League(object):
 class Team(object):
     """Information about a team"""
 
-    def __init__(self, tid):
-        self.tid = int(tid)
+    def __init__(self, id_):
+        self.id = int(id_)
         self._points_history = None
         self._name = None
         self._manager = None
 
     def __repr__(self):
-        return u"<Team({0})>".format(self.tid).encode('utf-8')
+        return u"<Team({0})>".format(self.id).encode('utf-8')
 
     def __str__(self):
         return u"{0} ({1})".format(self.name, self.manager).encode('utf-8')
@@ -84,7 +84,7 @@ class Team(object):
 
     def _fill_data_fields(self):
         url = 'http://fantasy.premierleague.com/entry/%d/history/'
-        soup = soupify(url % self.tid)
+        soup = soupify(url % self.id)
 
         points_history = []
         table = soup.find("table", {"class": "ismTable"})
