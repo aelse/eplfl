@@ -6,19 +6,62 @@ from BeautifulSoup import BeautifulSoup
 class League(object):
     """Information about a league"""
 
-    def __init__(self, lid, exclude_teams=[]):
-        self.lid = int(lid)
+    def __init__(self, id_):
+        self.id = int(id_)
+        self._name = None
+        self._teams = None
 
-        league_url = 'http://fantasy.premierleague.com/' \
-                     'my-leagues/%d/standings/'
-        soup = soupify(league_url % self.lid)
+    def _fill_data_fields(self):
+        league_url = 'http://fantasy.premierleague.com/my-leagues/%d/standings/'
+        soup = soupify(league_url % self.id)
 
-        n = soup.find("h2", {"class": "ismTabHeading"}).contents[0]
-        self.name = str(n)
+        name = soup.find("h2", {"class": "ismTabHeading"}).contents[0]
+        self._name = unicode(name)
 
-        standings = soup.find("table", {"class": "ismTable ismStandingsTable"})
-        team_rows = standings.findAll("tr")[1:]
-        self.teams = get_teams(soup, exclude_teams)
+        teams = []
+        for class_ in ["ismStandingsTable", "ismAddManTable"]:
+            standings = soup.find("table", {"class": "ismTable {0}".format(class_)})
+            team_rows = standings.findAll("tr")[1:]
+            for row in team_rows:
+                tds = row.findAll('td')
+                if re.search('League standings will be updated after the next matches',
+                    str(tds[0].contents[0])):
+                    # Placeholder table before first game week results are
+                    # released. Skip it.
+                    continue
+                team_name = tds[0].contents[0]
+                team_info = tds[1].contents[0]
+                m = re.search('href="/entry/(\d+)/', str(team_info))
+                team_id = int(m.groups()[0])
+                team_manager = team_info.contents[0]
+                team = Team(team_id)
+                team._name = team_name
+                team._manager = team_manager
+                teams.append(team)
+
+        # Order team list by team id
+        self._teams = sorted(teams, key=lambda x: x.tid)
+
+    def __repr__(self):
+        return u"<League({0})>".format(self.id).encode('utf-8')
+
+    def __str__(self):
+        return u"{0})".format(self.name).encode('utf-8')
+
+    def __unicode__(self):
+        return unicode(self.__str__())
+
+    @property
+    def name(self):
+        if not self._name:
+            self._fill_data_fields()
+        return self._name
+
+    @property
+    def teams(self):
+        if not self._teams:
+            self._fill_data_fields()
+        return self._teams
 
 
 class Team(object):
@@ -37,7 +80,7 @@ class Team(object):
         return u"{0} ({1})".format(self.name, self.manager).encode('utf-8')
 
     def __unicode__(self):
-        return self.__str__()
+        return unicode(self.__str__())
 
     def _fill_data_fields(self):
         url = 'http://fantasy.premierleague.com/entry/%d/history/'
@@ -50,8 +93,8 @@ class Team(object):
             points_history.append(gwp)
 
         self._points_history = points_history
-        self._manager = soup.find('h1', {'class': 'ismSection2'}).contents[0].encode('utf-8')
-        self._name = soup.find('h2', {'class': 'ismSection3'}).contents[0].encode('utf-8')
+        self._manager = unicode(soup.find('h1', {'class': 'ismSection2'}).contents[0])
+        self._name = unicode(soup.find('h2', {'class': 'ismSection3'}).contents[0])
 
     @property
     def points_history(self):
