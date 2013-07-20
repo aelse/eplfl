@@ -24,13 +24,20 @@ class League(object):
             team_rows = standings.findAll("tr")[1:]
             for row in team_rows:
                 tds = row.findAll('td')
-                if re.search('League standings will be updated after the next matches',
-                    str(tds[0].contents[0])):
-                    # Placeholder table before first game week results are
-                    # released. Skip it.
-                    continue
-                team_name = tds[0].contents[0]
-                team_info = tds[1].contents[0]
+                # Field offsets differ between tables
+                if class_ == "ismAddManTable":
+                    name_idx = 0
+                    info_idx = 1
+                if class_ == "ismStandingsTable":
+                    name_idx = 2
+                    info_idx = 3
+                    # Placeholder table before first game week results are released.
+                    # Skip it.
+                    if re.search('League standings will be updated after the next matches',
+                        str(tds[0].contents[0])):
+                        continue
+                team_name = tds[name_idx].contents[0]
+                team_info = tds[info_idx].contents[0]
                 m = re.search('href="/entry/(\d+)/', str(team_info))
                 team_id = int(m.groups()[0])
                 team_manager = team_info.contents[0]
