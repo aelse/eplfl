@@ -24,36 +24,52 @@ class League(object):
 class Team(object):
     """Information about a team"""
 
-    def __init__(self, tid, name, manager):
+    def __init__(self, tid):
         self.tid = int(tid)
-        self.name = name.rstrip().encode('utf-8')
-        self.manager = manager.rstrip().encode('utf-8')
-
         self._points_history = None
+        self._name = None
+        self._manager = None
 
     def __repr__(self):
-        return u"<Team(%d, u'%s', u'%s')>".encode('utf-8') % \
-            (self.tid, self.name, self.manager)
+        return u"<Team({0})>".format(self.tid).encode('utf-8')
+
+    def __str__(self):
+        return u"{0} ({1})".format(self.name, self.manager).encode('utf-8')
 
     def __unicode__(self):
-        return u"%s (%s)" % (self.name, self.manager)
+        return self.__str__()
 
-    @property
-    def points_history(self):
-        if self._points_history:
-            return self._points_history
-
+    def _fill_data_fields(self):
         url = 'http://fantasy.premierleague.com/entry/%d/history/'
         soup = soupify(url % self.tid)
-        table = soup.find("table", {"class": "ismTable"})
 
         points_history = []
+        table = soup.find("table", {"class": "ismTable"})
         for row in table.find('tbody').findAll('tr'):
             gwp = int(row.find('td', {'class': 'ismCol2'}).contents[0])
             points_history.append(gwp)
 
         self._points_history = points_history
+        self._manager = soup.find('h1', {'class': 'ismSection2'}).contents[0].encode('utf-8')
+        self._name = soup.find('h2', {'class': 'ismSection3'}).contents[0].encode('utf-8')
+
+    @property
+    def points_history(self):
+        if not self._points_history:
+            self._fill_data_fields()
         return self._points_history
+
+    @property
+    def name(self):
+        if not self._name:
+            self._fill_data_fields()
+        return self._name
+
+    @property
+    def manager(self):
+        if not self._manager:
+            self._fill_data_fields()
+        return self._manager
 
 
 class LeagueStanding(object):
