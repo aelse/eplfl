@@ -195,37 +195,3 @@ def soupify(url):
         raise
     soup = BeautifulSoup(r.text)
     return soup
-
-
-def get_teams(soup, exclude_teams):
-    """
-    Retrieve a list of teams in a league.
-
-    Pass a soup object of the league standing page.
-    Information about each team in the league is fetched and
-    returned in an ordered list of Team objects.
-    """
-    teams = []
-
-    table = soup.find("table", {"class": "ismTable ismStandingsTable"})
-    rows = table.findAll("tr")
-    # skip table header
-    rows = rows[1:]
-
-    for row in rows:
-        tds = row.findAll("td")
-        team_info = tds[2]
-        # match a unique team id
-        m = re.search('href="/entry/(\d+)/', str(team_info))
-        team_id = int(m.groups()[0])
-        team_name = team_info.contents[0].contents[0]
-        team_manager = tds[3].contents[0]
-
-        if team_id not in exclude_teams:
-            team = Team(team_id, team_name, team_manager)
-            teams.append(team)
-
-    # Order team list by team id
-    teams = sorted(teams, key=lambda x: x.tid)
-
-    return teams
