@@ -105,10 +105,13 @@ class Team(object):
         soup = soupify(url % self.id)
 
         points_history = []
-        table = soup.find("table", {"class": "ismTable"})
-        for row in table.find('tbody').findAll('tr'):
-            gwp = int(row.find('td', {'class': 'ismCol2'}).contents[0])
-            points_history.append(gwp)
+        this_season_header = soup.find(text=re.compile(r'This Season'))
+        section = this_season_header.parent.parent
+        table = section.find("table", {"class": "ismTable"})
+        if table:
+            for row in table.find('tbody').findAll('tr'):
+                gwp = int(row.find('td', {'class': 'ismCol2'}).contents[0])
+                points_history.append(gwp)
 
         self._points_history = points_history
         self._manager = unicode(soup.find('h1', {'class': 'ismSection2'}).contents[0])
