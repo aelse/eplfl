@@ -147,7 +147,7 @@ class LeagueStanding(object):
         self._rank_history = None
 
     def get_team_ids(self):
-        return [x.tid for x in self.league.teams]
+        return [x.id for x in self.league.teams]
 
     def get_team_names(self):
         return [x.name for x in self.league.teams]
@@ -167,7 +167,7 @@ class LeagueStanding(object):
         if not self._points_history:
             points_history = {}
             for team in self.league.teams:
-                points_history[team.tid] = team.points_history
+                points_history[team.id] = team.points_history
             self._points_history = points_history
         return self._points_history
 
@@ -178,10 +178,10 @@ class LeagueStanding(object):
             for team in self.league.teams:
                 points_total = []
                 total = 0
-                for points in self.points_history[team.tid]:
+                for points in self.points_history[team.id]:
                     total += points
                     points_total.append(total)
-                points_total_by_gameweek[team.tid] = points_total
+                points_total_by_gameweek[team.id] = points_total
             self._points_total_by_gameweek = points_total_by_gameweek
         return self._points_total_by_gameweek
 
