@@ -13,38 +13,49 @@ class League(object):
 
     def _fill_data_fields(self):
         league_url = 'http://fantasy.premierleague.com/my-leagues/%d/standings/'
-        soup = soupify(league_url % self.id)
-
-        name = soup.find("h2", {"class": "ismTabHeading"}).contents[0]
-        self._name = unicode(name)
+        page_number = 1
+        more_pages = True
 
         teams = []
-        for class_ in ["ismStandingsTable", "ismAddManTable"]:
-            standings = soup.find("table", {"class": "ismTable {0}".format(class_)})
-            team_rows = standings.findAll("tr")[1:]
-            for row in team_rows:
-                tds = row.findAll('td')
-                # Field offsets differ between tables
-                if class_ == "ismAddManTable":
-                    name_idx = 0
-                    info_idx = 1
-                if class_ == "ismStandingsTable":
-                    name_idx = 2
-                    info_idx = 3
-                    # Placeholder table before first game week results are released.
-                    # Skip it.
-                    if re.search('League standings will be updated after the next matches',
-                        str(tds[0].contents[0])):
-                        continue
-                team_name = tds[name_idx].contents[0]
-                team_info = tds[info_idx].contents[0]
-                m = re.search('href="/entry/(\d+)/', str(team_info))
-                team_id = int(m.groups()[0])
-                team_manager = team_info.contents[0]
-                team = Team(team_id)
-                team._name = team_name
-                team._manager = team_manager
-                teams.append(team)
+        while more_pages:
+            url = league_url + '?le-page=%d' % page_number
+            soup = soupify(url % self.id)
+
+            name = soup.find("h2", {"class": "ismTabHeading"}).contents[0]
+            self._name = unicode(name)
+
+            for class_ in ["ismStandingsTable", "ismAddManTable"]:
+                standings = soup.find("table", {"class": "ismTable {0}".format(class_)})
+                team_rows = standings.findAll("tr")[1:]
+                for row in team_rows:
+                    tds = row.findAll('td')
+                    # Field offsets differ between tables
+                    if class_ == "ismAddManTable":
+                        name_idx = 0
+                        info_idx = 1
+                    if class_ == "ismStandingsTable":
+                        name_idx = 2
+                        info_idx = 3
+                        # Placeholder table before first game week results are released.
+                        # Skip it.
+                        if re.search('League standings will be updated after the next matches',
+                            str(tds[0].contents[0])):
+                            continue
+                    team_name = tds[name_idx].contents[0]
+                    team_info = tds[info_idx].contents[0]
+                    m = re.search('href="/entry/(\d+)/', str(team_info))
+                    team_id = int(m.groups()[0])
+                    team_manager = team_info.contents[0]
+                    team = Team(team_id)
+                    team._name = team_name
+                    team._manager = team_manager
+                    teams.append(team)
+
+            # Look for presence of a link to the next page of results
+            # to determine if we have the complete list of teams.
+            page_number = page_number + 1
+            if not soup.find(href=re.compile('\?le-page=%d' % page_number)):
+                more_pages = False
 
         # Order team list by team id
         self._teams = sorted(teams, key=lambda x: x.id)
