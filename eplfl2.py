@@ -105,20 +105,19 @@ class Team(object):
 
     def _fill_data_fields(self):
         url = 'http://fantasy.premierleague.com/entry/%d/history/'
-        soup = soupify(url % self.id)
+        pq = pqify(url % self.id)
 
         points_history = []
-        this_season_header = soup.find(text=re.compile(r'This Season'))
-        section = this_season_header.parent.parent
-        table = section.find("table", {"class": "ismTable"})
+        this_season_section = pq('section.ismPrimaryNarrow').children()[0]
+        table = this_season_section.find('table')
         if table:
-            for row in table.find('tbody').findAll('tr'):
-                gwp = int(row.find('td', {'class': 'ismCol2'}).contents[0])
+            for row in table.find('tbody').getchildren():
+                gwp = int(PyQuery(row).find('td.ismCol2').text())
                 points_history.append(gwp)
 
         self._points_history = points_history
-        self._manager = unicode(soup.find('h1', {'class': 'ismSection2'}).contents[0])
-        self._name = unicode(soup.find('h2', {'class': 'ismSection3'}).contents[0])
+        self._manager = unicode(pq('h1.ismSection2').text())
+        self._name = unicode(pq('h2.ismSection3').text())
 
     @property
     def points_history(self):
