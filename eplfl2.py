@@ -146,6 +146,7 @@ class LeagueStanding(object):
         self._points_history = None
         self._points_total_by_gameweek = None
         self._rank_history = None
+        self._score_totals = None
 
     def get_team_ids(self):
         return [x.id for x in self.league.teams]
@@ -202,6 +203,15 @@ class LeagueStanding(object):
                         rank_history[tupl[0]] = [rank]
             self._rank_history = rank_history
         return self._rank_history
+
+    @property
+    def score_totals(self):
+        if not self._score_totals:
+            score_totals = []
+            gw_totals = self.points_total_by_gameweek
+            score_totals = dict([(team.id, self.points_total_by_gameweek[team.id][-1]) for team in self.league.teams])
+            self._score_totals = score_totals
+        return self._score_totals
 
 
 def pqify(url):
