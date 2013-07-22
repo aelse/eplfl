@@ -2,7 +2,6 @@ import re
 import requests
 from BeautifulSoup import BeautifulSoup
 from pyquery import PyQuery
-import pyquery
 
 
 class League(object):
