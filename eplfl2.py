@@ -1,6 +1,8 @@
 import re
 import requests
 from BeautifulSoup import BeautifulSoup
+from pyquery import PyQuery
+import pyquery
 
 
 class League(object):
@@ -19,16 +21,16 @@ class League(object):
         teams = []
         while more_pages:
             url = league_url + '?le-page=%d' % page_number
-            soup = soupify(url % self.id)
+            pq = pqify(url % self.id)
 
-            name = soup.find("h2", {"class": "ismTabHeading"}).contents[0]
+            name = pq("h2.ismTabHeading").text()
             self._name = unicode(name)
 
             for class_ in ["ismStandingsTable", "ismAddManTable"]:
-                standings = soup.find("table", {"class": "ismTable {0}".format(class_)})
-                team_rows = standings.findAll("tr")[1:]
+                standings = pq("table.ismTable.{0}".format(class_))
+                team_rows = standings('tr')[1:]
                 for row in team_rows:
-                    tds = row.findAll('td')
+                    tds = row.getchildren()
                     # Field offsets differ between tables
                     if class_ == "ismAddManTable":
                         name_idx = 0
@@ -39,13 +41,13 @@ class League(object):
                         # Placeholder table before first game week results are released.
                         # Skip it.
                         if re.search('League standings will be updated after the next matches',
-                            str(tds[0].contents[0])):
+                            tds[0].text):
                             continue
-                    team_name = tds[name_idx].contents[0]
-                    team_info = tds[info_idx].contents[0]
-                    m = re.search('href="/entry/(\d+)/', str(team_info))
+                    team_name = tds[name_idx].text
+                    href = tds[info_idx].find('a').attrib['href']
+                    m = re.search('/entry/(\d+)/', href)
                     team_id = int(m.groups()[0])
-                    team_manager = team_info.contents[0]
+                    team_manager = tds[info_idx].text_content()
                     team = Team(team_id)
                     team._name = team_name
                     team._manager = team_manager
@@ -54,7 +56,9 @@ class League(object):
             # Look for presence of a link to the next page of results
             # to determine if we have the complete list of teams.
             page_number = page_number + 1
-            if not soup.find(href=re.compile('\?le-page=%d' % page_number)):
+            if not pq('a').map(
+                lambda i, x: re.search('\?le-page=%d' % page_number,
+                                       x.attrib['href'])):
                 more_pages = False
 
         # Order team list by team id
@@ -201,6 +205,15 @@ class LeagueStanding(object):
                         rank_history[tupl[0]] = [rank]
             self._rank_history = rank_history
         return self._rank_history
+
+
+def pqify(url):
+    r = requests.get(url)
+    if not r.ok:
+        print 'Could not get url %s' % url
+        raise
+    pq = PyQuery(r.text)
+    return pq
 
 
 def soupify(url):
