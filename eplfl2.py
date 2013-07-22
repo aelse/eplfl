@@ -1,6 +1,5 @@
 import re
 import requests
-from BeautifulSoup import BeautifulSoup
 from pyquery import PyQuery
 
 
@@ -212,11 +211,3 @@ def pqify(url):
         raise
     pq = PyQuery(r.text)
     return pq
-
-
-def soupify(url):
-    r = requests.get(url)
-    if not r.ok:
-        raise
-    soup = BeautifulSoup(r.text)
-    return soup
