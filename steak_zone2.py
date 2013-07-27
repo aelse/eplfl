@@ -94,7 +94,7 @@ def graph_points_history(standing, history, title, filename):
 
     layer = c.addLineLayer2()
     layer.setLineWidth(2)
-    for k in history.keys():
+    for k in sorted(history.keys()):
         # Possible gaps in points data will have a value of 0, which we
         # replace with NoValue so ChartDirector handles them nicely.
         # We make the fair assumption that no team actually scored 0
@@ -128,7 +128,7 @@ def graph_rank_history(standing, history, title, filename):
 
     layer = c.addLineLayer2()
     layer.setLineWidth(2)
-    for k in history.keys():
+    for k in sorted(history.keys()):
         # Possible gaps in points data will have a value of 0, which we
         # replace with NoValue so ChartDirector handles them nicely.
         # Every team must have had a rank in each week.
