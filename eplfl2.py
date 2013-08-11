@@ -3,6 +3,15 @@ import requests
 from pyquery import PyQuery
 
 
+def pqify(url):
+    r = requests.get(url)
+    if not r.ok:
+        print 'Could not get url %s' % url
+        raise
+    pq = PyQuery(r.text)
+    return pq
+
+
 class League(object):
     """Information about a league"""
 
@@ -276,12 +285,3 @@ class LeagueStanding(object):
             score_totals = dict([(team.id, self.points_total_by_gameweek[team.id][-1]) for team in self.league.teams])
             self._score_totals = score_totals
         return self._score_totals
-
-
-def pqify(url):
-    r = requests.get(url)
-    if not r.ok:
-        print 'Could not get url %s' % url
-        raise
-    pq = PyQuery(r.text)
-    return pq
