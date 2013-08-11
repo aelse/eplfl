@@ -137,6 +137,70 @@ class Team(object):
         return self._manager
 
 
+class Squad(object):
+    """Squad makeup for a particular team in a particular gameweek"""
+
+    def __init__(self, team_id, gameweek):
+        self.team_id = team_id
+        self.gameweek = gameweek
+
+        self._players = None
+
+    def __repr__(self):
+        return u"<Squad({0}, {1})>".format(self.team_id, self.gameweek).encode('utf-8')
+
+    def __str__(self):
+        return u"Squad {0} (gameweek {1})".format(self.team_id, self.gameweek).encode('utf-8')
+
+    def __unicode__(self):
+        return unicode(self.__str__())
+
+    def _fill_data_fields(self):
+        url = 'http://fantasy.premierleague.com/entry/%d/event-history/%d/'
+        pq = pqify(url % (self.team_id, self.gameweek))
+
+        players = []
+        table = pq('table.ismJsStatsGrouped.ismTable.ismDtTable.ismDataView')
+        if table:
+            for row in table('tbody#ismDataElements').children():
+                tds = row.findall('td')
+                team_name = tds[0].find('img').get('alt')
+                player_name = tds[1].text.strip()
+                player = Player(player_name, team_name)
+                players.append(player)
+        self._players = players
+
+        # debug
+        import random
+        points_history = [random.randint(10, 30) for x in xrange(5)]
+
+        self._points_history = points_history
+        self._manager = unicode(pq('h1.ismSection2').text())
+        self._name = unicode(pq('h2.ismSection3').text())
+
+    @property
+    def players(self):
+        if not self._players:
+            self._fill_data_fields()
+        return self._players
+
+
+class Player(object):
+
+    def __init__(self, player_name, team_name):
+        self.player_name = player_name
+        self.team_name = team_name
+
+    def __repr__(self):
+        return u"<Player('{0}', '{1}')>".format(self.player_name, self.team_name).encode('utf-8')
+
+    def __str__(self):
+        return u"{0} ({1})".format(self.player_name, self.team_name).encode('utf-8')
+
+    def __unicode__(self):
+        return unicode(self.__str__())
+
+
 class LeagueStanding(object):
     """All scoring data for a League"""
 
