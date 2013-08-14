@@ -79,7 +79,7 @@ def graph_points_total_at_gameweek(standing):
 def graph_points_history(standing, history, title, filename):
     # number of weeks the game runs for
     num_weeks = 38
-    labels = [''] * 2 + ['%d' % x for x in range(1, num_weeks + 1)]
+    labels = [''] + ['%d' % x for x in range(1, num_weeks + 1)]
     y_label = 'Points'
     x_label = 'Gameweek'
 
@@ -99,9 +99,9 @@ def graph_points_history(standing, history, title, filename):
         # replace with NoValue so ChartDirector handles them nicely.
         # We make the fair assumption that no team actually scored 0
         # in a game week.
-        history[k] = [0] + map(lambda x: x if x else NoValue, history[k])
+        values = [0] + map(lambda x: x if x else NoValue, history[k])
 
-        layer.addDataSet(history[k], -1, name_map[k])
+        layer.addDataSet(values, -1, name_map[k])
 
     c.makeChart(filename)
 
@@ -109,7 +109,7 @@ def graph_points_history(standing, history, title, filename):
 def graph_rank_history(standing, history, title, filename):
     # number of weeks the game runs for
     num_weeks = 38
-    labels = [''] * 2 + ['%d' % x for x in range(1, num_weeks + 1)]
+    labels = [''] + ['%d' % x for x in range(1, num_weeks + 1)]
     y_label = 'Rank'
     x_label = 'Gameweek'
 
@@ -133,9 +133,9 @@ def graph_rank_history(standing, history, title, filename):
         # replace with NoValue so ChartDirector handles them nicely.
         # Every team must have had a rank in each week.
         # Reverse ordering of team rank. Number one is best, display at top
-        history[k] = [0] + map(lambda x: num_teams - x + 1 if x else NoValue, history[k])
+        values = [0] + map(lambda x: num_teams - x + 1 if x else NoValue, history[k])
 
-        layer.addDataSet(history[k], -1, name_map[k])
+        layer.addDataSet(values, -1, name_map[k])
 
     c.makeChart(filename)
 
@@ -225,7 +225,7 @@ def generate_total_score_history(league):
 
 if __name__ == "__main__":
     """The Steak Zone league"""
-    my_league_id = 45658
+    my_league_id = 45658  # steak zone
 
     league = eplfl.League(my_league_id)
     league_standing = eplfl.LeagueStanding(league)
