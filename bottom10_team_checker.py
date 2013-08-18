@@ -6,9 +6,9 @@ if __name__ == '__main__':
     my_league_id = 235981
     gameweek = 1
 
-    permitted_teams = ['New England Revolution', 'FC Dallas',
-        'Portland Timbers', 'New York Red Bulls', 'Columbus Crew',
-        'Philadelphia Union', 'Colorado Rapids', 'Los Angeles Galaxy']
+    permitted_teams = ['Aston Villa', 'Cardiff City', 'Crystal Palace',
+                       'Fulham', 'Hull City', 'Norwich', 'Newcastle',
+                       'Southampton', 'Stoke City', 'Sunderland']
     max_players_per_team = 2
 
     report = ''
