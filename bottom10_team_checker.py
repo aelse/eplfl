@@ -1,4 +1,5 @@
 import eplfl2 as eplfl
+import unicodedata
 
 
 if __name__ == '__main__':
@@ -11,7 +12,7 @@ if __name__ == '__main__':
                        'Southampton', 'Stoke City', 'Sunderland']
     max_players_per_team = 2
 
-    report = ''
+    report = u''
 
     league = eplfl.League(my_league_id)
 
@@ -35,8 +36,12 @@ if __name__ == '__main__':
                     'Squad contains {0} players from {1}'.format(
                     player_count, team_name))
         if violations:
+            t_manager = unicodedata.normalize('NFKD', team.manager).encode('ascii', 'ignore')
+            t_name = unicodedata.normalize('NFKD', team.name).encode('ascii', 'ignore')
+            line = 'Violations found in team {0} managed by {1}\n'.format(
+                t_name, t_manager)
             report += 'Violations found in team {0} managed by {1}\n'.format(
-                team.name, team.manager)
+                t_name, t_manager)
             report += 'http://fantasy.premierleague.com/entry/%d/event-history/%d/\n' % (team.id, gameweek)
             for violation in violations:
                 report += ' - ' + violation + '\n'
