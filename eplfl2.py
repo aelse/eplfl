@@ -47,12 +47,20 @@ class League(object):
                         info_idx = 3
                         # Placeholder table before first game week results are released.
                         # Skip it.
-                        if re.search('League standings will be updated after the next matches',
+                        if tds[0].text and re.search(
+                            'League standings will be updated after the next matches',
                             tds[0].text):
                             continue
-                    team_name = tds[name_idx].text
-                    href = tds[info_idx].find('a').attrib['href']
+                    team_name = tds[name_idx].text_content()
+                    link = tds[name_idx].find('a')
+                    if link is None:
+                        # MLS version
+                        link = tds[info_idx].find('a')
+                    href = link.attrib['href']
                     m = re.search('/entry/(\d+)/', href)
+                    if not m:
+                        href = tds[info_idx].find('a').attrib['href']
+                        m = re.search('/entry/(\d+)/', href)
                     team_id = int(m.groups()[0])
                     team_manager = tds[info_idx].text_content()
                     team = Team(team_id)
@@ -169,8 +177,16 @@ class Squad(object):
         pq = pqify(url % (self.team_id, self.gameweek))
 
         players = []
-        table = pq('table.ismJsStatsGrouped.ismTable.ismDtTable.ismDataView')
-        if table:
+        div = pq('div#ismTeamDisplayGraphical')
+        if div:
+            for player in pq('div.ismPlayerContainer'):
+                team_name = player.find_class('ismShirt')[0].attrib['title']
+                player_name = player.find_class('ismPitchWebName')[0].text_content().strip()
+                player = Player(player_name, team_name)
+                players.append(player)
+        else:
+            # MLS version
+            table = pq('table.ismJsStatsGrouped.ismTable.ismDtTable.ismDataView')
             for row in table('tbody#ismDataElements').children():
                 tds = row.findall('td')
                 team_name = tds[0].find('img').get('alt')
