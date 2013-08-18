@@ -195,10 +195,6 @@ class Squad(object):
                 players.append(player)
         self._players = players
 
-        # debug
-        import random
-        points_history = [random.randint(10, 30) for x in xrange(5)]
-
         self._points_history = points_history
         self._manager = unicode(pq('h1.ismSection2').text())
         self._name = unicode(pq('h2.ismSection3').text())
