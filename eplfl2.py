@@ -51,7 +51,7 @@ class League(object):
                             'League standings will be updated after the next matches',
                             tds[0].text):
                             continue
-                    team_name = tds[name_idx].text_content()
+                    team_name = unicode(tds[name_idx].text_content())
                     link = tds[name_idx].find('a')
                     if link is None:
                         # MLS version
@@ -62,7 +62,7 @@ class League(object):
                         href = tds[info_idx].find('a').attrib['href']
                         m = re.search('/entry/(\d+)/', href)
                     team_id = int(m.groups()[0])
-                    team_manager = tds[info_idx].text_content()
+                    team_manager = unicode(tds[info_idx].text_content())
                     team = Team(team_id)
                     team._name = team_name
                     team._manager = team_manager
