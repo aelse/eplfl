@@ -3,8 +3,8 @@ import eplfl2 as eplfl
 
 if __name__ == '__main__':
     """Bottom 10 League Checker"""
-    my_league_id = 3843
-    gameweek = 25
+    my_league_id = 235981
+    gameweek = 1
 
     permitted_teams = ['New England Revolution', 'FC Dallas',
         'Portland Timbers', 'New York Red Bulls', 'Columbus Crew',
