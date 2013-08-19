@@ -126,7 +126,7 @@ class Team(object):
         points_history = []
         this_season_section = pq('section.ismPrimaryNarrow').children()[0]
         table = this_season_section.find('table')
-        if table:
+        if table is not None:
             for row in table.find('tbody').getchildren():
                 gwp = int(PyQuery(row).find('td.ismCol2').text())
                 points_history.append(gwp)
