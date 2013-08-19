@@ -1,4 +1,5 @@
-import eplfl
+import eplfl2 as eplfl
+import numpy
 import operator
 import csv
 import sys
@@ -15,7 +16,8 @@ def graph_gameweek_by_team(standing):
     points = standing.get_gameweek_points()
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
-    labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    #labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    labels = ['%s' % (team_names[i]) for i, x in enumerate(team_names)]
     y_label = "Points"
     title = 'Gameweek %d Accumulated Points' % standing.gameweek
 
@@ -29,13 +31,14 @@ def graph_gameweek_by_team(standing):
 def graph_points_total_at_gameweek(standing):
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
-    labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    #labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    labels = ['%s' % (team_names[i]) for i, x in enumerate(team_names)]
     y_label = "Points"
     title = 'Points Total at Gameweek %d' % standing.gameweek
 
     # Work out the top and bottom 3 teams
-    team_ids = [x.tid for x in standing.league.teams]
-    points = standing.get_total_score()
+    team_ids = [x.id for x in standing.league.teams]
+    points = [standing.score_totals[x.id] for x in standing.league.teams]
     point_map = dict(zip(team_ids, points))
     low_to_high = sorted(point_map.iteritems(), key=operator.itemgetter(1))
 
@@ -78,7 +81,7 @@ def graph_points_total_at_gameweek(standing):
 def graph_points_history(standing, history, title, filename):
     # number of weeks the game runs for
     num_weeks = 38
-    labels = [''] * 2 + ['%d' % x for x in range(1, num_weeks + 1)]
+    labels = [''] + ['%d' % x for x in range(1, num_weeks + 1)]
     y_label = 'Points'
     x_label = 'Gameweek'
 
@@ -93,14 +96,14 @@ def graph_points_history(standing, history, title, filename):
 
     layer = c.addLineLayer2()
     layer.setLineWidth(2)
-    for k in history.keys():
+    for k in sorted(history.keys()):
         # Possible gaps in points data will have a value of 0, which we
         # replace with NoValue so ChartDirector handles them nicely.
         # We make the fair assumption that no team actually scored 0
         # in a game week.
-        history[k] = [0] + map(lambda x: x if x else NoValue, history[k])
+        values = [0] + map(lambda x: x if x else NoValue, history[k])
 
-        layer.addDataSet(history[k], -1, name_map[k])
+        layer.addDataSet(values, -1, name_map[k])
 
     c.makeChart(filename)
 
@@ -108,7 +111,7 @@ def graph_points_history(standing, history, title, filename):
 def graph_rank_history(standing, history, title, filename):
     # number of weeks the game runs for
     num_weeks = 38
-    labels = [''] * 2 + ['%d' % x for x in range(1, num_weeks + 1)]
+    labels = [''] + ['%d' % x for x in range(1, num_weeks + 1)]
     y_label = 'Rank'
     x_label = 'Gameweek'
 
@@ -127,14 +130,14 @@ def graph_rank_history(standing, history, title, filename):
 
     layer = c.addLineLayer2()
     layer.setLineWidth(2)
-    for k in history.keys():
+    for k in sorted(history.keys()):
         # Possible gaps in points data will have a value of 0, which we
         # replace with NoValue so ChartDirector handles them nicely.
         # Every team must have had a rank in each week.
         # Reverse ordering of team rank. Number one is best, display at top
-        history[k] = [0] + map(lambda x: num_teams - x + 1 if x else NoValue, history[k])
+        values = [0] + map(lambda x: num_teams - x + 1 if x else NoValue, history[k])
 
-        layer.addDataSet(history[k], -1, name_map[k])
+        layer.addDataSet(values, -1, name_map[k])
 
     c.makeChart(filename)
 
@@ -146,7 +149,8 @@ def chart_boilerplate(title, labels, y_label):
     l = c.xAxis().setLabels(labels)
     l.setFontAngle(-25)
     l.setFontStyle(label_font)
-    l.setPos(l.getLeftX() - 25, l.getTopY())
+    #l.setPos(l.getLeftX() - 25, l.getTopY())
+    l.setPos(l.getLeftX() - 15, l.getTopY())
     c.addTitle(title, title_font, 20)
     c.yAxis().setTitle(y_label)
 
@@ -208,28 +212,34 @@ def update_points_history(savefile, gameweek, points):
     write_points_history(savefile, history)
 
 
+def generate_points_history(league):
+    history = {}
+    for team in league.teams:
+        history[team.id] = team.points_history
+    return history
+
+
+def generate_total_score_history(league):
+    history = {}
+    for team in league.teams:
+        history[team.id] = numpy.cumsum(team.points_history)
+    return history
+
+
 if __name__ == "__main__":
     """The Steak Zone league"""
-    my_league_id = 74096
+    my_league_id = 45658  # steak zone
 
-    exclude_teams = []
-
-    league = eplfl.League(my_league_id, exclude_teams)
+    league = eplfl.League(my_league_id)
     league_standing = eplfl.LeagueStanding(league)
 
-    savefile = 'data/%d_gameweek_points_history.csv' % my_league_id
-    update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_gameweek_points())))
-    history = load_points_history(savefile)
+    history = league_standing.points_history
     graph_points_history(league_standing, history, 'Gameweek Points History', 'gameweek_points_history.png')
 
-    savefile = 'data/%d_total_points_history.csv' % my_league_id
-    update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_total_score())))
-    history = load_points_history(savefile)
+    history = league_standing.points_total_by_gameweek
     graph_points_history(league_standing, history, 'Total Points History', 'total_points_history.png')
 
-    savefile = 'data/%d_rank_history.csv' % my_league_id
-    update_points_history(savefile, league_standing.gameweek, dict(zip([x.tid for x in league.teams], league_standing.get_league_ranks())))
-    history = load_points_history(savefile)
+    history = league_standing.rank_history
     graph_rank_history(league_standing, history, 'League Rank History', 'league_rank_history.png')
 
     graph_gameweek_by_team(league_standing)
