@@ -1,4 +1,4 @@
-import eplfl2 as eplfl
+import eplfl
 import numpy
 import operator
 import csv
