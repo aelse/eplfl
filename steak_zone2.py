@@ -16,7 +16,8 @@ def graph_gameweek_by_team(standing):
     points = standing.get_gameweek_points()
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
-    labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    #labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    labels = ['%s' % (team_names[i]) for i, x in enumerate(team_names)]
     y_label = "Points"
     title = 'Gameweek %d Accumulated Points' % standing.gameweek
 
@@ -30,7 +31,8 @@ def graph_gameweek_by_team(standing):
 def graph_points_total_at_gameweek(standing):
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
-    labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    #labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    labels = ['%s' % (team_names[i]) for i, x in enumerate(team_names)]
     y_label = "Points"
     title = 'Points Total at Gameweek %d' % standing.gameweek
 
@@ -147,7 +149,8 @@ def chart_boilerplate(title, labels, y_label):
     l = c.xAxis().setLabels(labels)
     l.setFontAngle(-25)
     l.setFontStyle(label_font)
-    l.setPos(l.getLeftX() - 25, l.getTopY())
+    #l.setPos(l.getLeftX() - 25, l.getTopY())
+    l.setPos(l.getLeftX() - 15, l.getTopY())
     c.addTitle(title, title_font, 20)
     c.yAxis().setTitle(y_label)
 
