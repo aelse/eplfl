@@ -12,7 +12,7 @@ steak_image  = "steak.png" # image from iconshock.com, free for personal use
 label_font = "Numans-Regular.ttf"
 title_font = "Avenir LT 65 Medium.ttf"
 
-def graph_gameweek_by_team(standing):
+def graph_gameweek_by_team(standing, filename):
     points = standing.get_gameweek_points()
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
@@ -24,10 +24,10 @@ def graph_gameweek_by_team(standing):
 
     c = chart_boilerplate(title, labels, y_label)
     c.addBarLayer3(points, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
-    c.makeChart('gameweek_by_team.png')
+    c.makeChart(filename)
 
 
-def graph_points_total_at_gameweek(standing):
+def graph_points_total_at_gameweek(standing, filename):
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
     labels = [team_names[i] for i, x in enumerate(team_names)]
@@ -242,5 +242,5 @@ if __name__ == "__main__":
     history = league_standing.rank_history
     graph_rank_history(league_standing, history, 'League Rank History', 'league_rank_history.png')
 
-    graph_gameweek_by_team(league_standing)
-    graph_points_total_at_gameweek(league_standing)
+    graph_gameweek_by_team(league_standing, 'gameweek_by_team.png')
+    graph_points_total_at_gameweek(league_standing, 'total_by_team.png')
