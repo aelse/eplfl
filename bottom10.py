@@ -229,7 +229,7 @@ def generate_total_score_history(league):
 
 if __name__ == "__main__":
     """The Steak Zone league"""
-    my_league_id = 235981  # /r/soccer classic
+    my_league_id = 235981  # /r/bottomtenleague classic
 
     league = eplfl.League(my_league_id)
     league_standing = eplfl.LeagueStanding(league)
