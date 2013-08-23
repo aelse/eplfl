@@ -16,8 +16,7 @@ def graph_gameweek_by_team(standing):
     points = standing.get_gameweek_points()
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
-    #labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
-    labels = ['%s' % (team_names[i]) for i, x in enumerate(team_names)]
+    labels = [team_names[i] for i, x in enumerate(team_names)]
     y_label = "Points"
     title = 'Gameweek %d Accumulated Points' % standing.gameweek
 
@@ -31,8 +30,7 @@ def graph_gameweek_by_team(standing):
 def graph_points_total_at_gameweek(standing):
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
-    #labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
-    labels = ['%s' % (team_names[i]) for i, x in enumerate(team_names)]
+    labels = [team_names[i] for i, x in enumerate(team_names)]
     y_label = "Points"
     title = 'Points Total at Gameweek %d' % standing.gameweek
 
@@ -81,16 +79,16 @@ def graph_points_total_at_gameweek(standing):
 def graph_points_history(standing, history, title, filename):
     # number of weeks the game runs for
     num_weeks = 38
-    labels = [''] + ['%d' % x for x in range(1, num_weeks + 1)]
+    labels = ['~'] + ['%d' % x for x in range(1, num_weeks + 1)]
     y_label = 'Points'
     x_label = 'Gameweek'
 
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
-    line_labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    line_labels = [''] + ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
     name_map = dict(zip(standing.get_team_ids(), team_names))
 
-    c = chart_boilerplate(title, labels, y_label)
+    c = chart_boilerplate(title, labels, y_label, numeric_labels=True)
     c.xAxis().setTitle(x_label)
     c.addLegend(50, 390, 0, label_font, 8).setBackground(Transparent)
 
@@ -111,19 +109,19 @@ def graph_points_history(standing, history, title, filename):
 def graph_rank_history(standing, history, title, filename):
     # number of weeks the game runs for
     num_weeks = 38
-    labels = [''] + ['%d' % x for x in range(1, num_weeks + 1)]
+    labels = ['~'] + ['%d' % x for x in range(1, num_weeks + 1)]
     y_label = 'Rank'
     x_label = 'Gameweek'
 
     team_names = standing.get_team_names()
     managers = standing.get_manager_names()
-    line_labels = ['%s\n%s' % (team_names[i], managers[i]) for i, x in enumerate(team_names)]
+    line_labels = [''] + [team_names[i] for i, x in enumerate(team_names)]
     name_map = dict(zip(standing.get_team_ids(), team_names))
 
     num_teams = len(team_names)
     yaxis_labels = [''] + map(lambda x: '%d' % (num_teams - x), range(0, num_teams))
 
-    c = chart_boilerplate(title, labels, y_label)
+    c = chart_boilerplate(title, labels, y_label, numeric_labels=True)
     c.xAxis().setTitle(x_label)
     l = c.yAxis().setLabels(yaxis_labels)
     c.addLegend(50, 390, 0, label_font, 8).setBackground(Transparent)
@@ -142,15 +140,17 @@ def graph_rank_history(standing, history, title, filename):
     c.makeChart(filename)
 
 
-def chart_boilerplate(title, labels, y_label):
+def chart_boilerplate(title, labels, y_label, numeric_labels=False):
     c = XYChart(900, 450, '0xffffff', '0x000000', 1)
 
     c.setPlotArea(50, 50, 800, 300, '0xffffff', '0xf8f8f8', Transparent, c.dashLineColor('0xcccccc', DotLine), c.dashLineColor('0xcccccc', DotLine))
     l = c.xAxis().setLabels(labels)
-    l.setFontAngle(-25)
+    if not numeric_labels:
+        # Numeric labels are not rotated or offset
+        l.setFontAngle(-25)
+        l.setPos(l.getLeftX() - 25, l.getTopY())
+        #l.setPos(l.getLeftX() - 15, l.getTopY())
     l.setFontStyle(label_font)
-    #l.setPos(l.getLeftX() - 25, l.getTopY())
-    l.setPos(l.getLeftX() - 15, l.getTopY())
     c.addTitle(title, title_font, 20)
     c.yAxis().setTitle(y_label)
 
