@@ -122,8 +122,15 @@ class Team(object):
     def _fill_data_fields(self):
         url = 'http://fantasy.premierleague.com/entry/%d/history/'
         pq = pqify(url % self.id)
-
-        points_history = []
+        # Work out which gameweek a team was created and use that to
+        # pad the list of scores with 0 for missed game weeks.
+        start_week = 1
+        for link in pq('a'):
+            if re.match('/my-leagues/', link.get('href')):
+                m = re.match('Gameweek (\d+)', link.text.strip())
+                if m:
+                    start_week = int(m.groups()[0])
+        points_history = [0] * (start_week - 1)
         this_season_section = pq('section.ismPrimaryNarrow').children()[0]
         table = this_season_section.find('table')
         if table is not None:
