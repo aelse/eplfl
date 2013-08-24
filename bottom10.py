@@ -147,9 +147,8 @@ def chart_boilerplate(title, labels, y_label, numeric_labels=False):
     l = c.xAxis().setLabels(labels)
     if not numeric_labels:
         # Numeric labels are not rotated or offset
-        l.setFontAngle(-25)
-        l.setPos(l.getLeftX() - 25, l.getTopY())
-        #l.setPos(l.getLeftX() - 15, l.getTopY())
+        l.setFontAngle(-50)
+        l.setPos(l.getLeftX() - 5, l.getTopY())
     l.setFontStyle(label_font)
     c.addTitle(title, title_font, 20)
     c.yAxis().setTitle(y_label)
