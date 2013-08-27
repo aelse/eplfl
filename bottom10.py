@@ -90,7 +90,7 @@ def graph_points_history(standing, history, title, filename):
 
     c = chart_boilerplate(title, labels, y_label, numeric_labels=True)
     c.xAxis().setTitle(x_label)
-    c.addLegend(50, 390, 0, label_font, 8).setBackground(Transparent)
+    c.addLegend(50, 540, 0, label_font, 8).setBackground(Transparent)
 
     layer = c.addLineLayer2()
     layer.setLineWidth(2)
@@ -124,7 +124,7 @@ def graph_rank_history(standing, history, title, filename):
     c = chart_boilerplate(title, labels, y_label, numeric_labels=True)
     c.xAxis().setTitle(x_label)
     l = c.yAxis().setLabels(yaxis_labels)
-    c.addLegend(50, 390, 0, label_font, 8).setBackground(Transparent)
+    c.addLegend(50, 540, 0, label_font, 8).setBackground(Transparent)
 
     layer = c.addLineLayer2()
     layer.setLineWidth(2)
@@ -141,9 +141,9 @@ def graph_rank_history(standing, history, title, filename):
 
 
 def chart_boilerplate(title, labels, y_label, numeric_labels=False):
-    c = XYChart(900, 450, '0xffffff', '0x000000', 1)
+    c = XYChart(1100, 650, '0xffffff', '0x000000', 1)
 
-    c.setPlotArea(50, 50, 800, 300, '0xffffff', '0xf8f8f8', Transparent, c.dashLineColor('0xcccccc', DotLine), c.dashLineColor('0xcccccc', DotLine))
+    c.setPlotArea(50, 50, 1000, 450, '0xffffff', '0xf8f8f8', Transparent, c.dashLineColor('0xcccccc', DotLine), c.dashLineColor('0xcccccc', DotLine))
     l = c.xAxis().setLabels(labels)
     if not numeric_labels:
         # Numeric labels are not rotated or offset
