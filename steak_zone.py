@@ -73,7 +73,7 @@ def graph_points_total_at_gameweek(standing, filename):
     c = chart_boilerplate(title, labels, y_label)
     c.addScatterLayer(dataX, dataY).getDataSet(0).setDataSymbol2(steak_image)
     c.addBarLayer3(points, colours).setBorderColor(Transparent, barLighting(0.75, 2.0))
-    c.makeChart('total_by_team.png')
+    c.makeChart(filename)
 
 
 def graph_points_history(standing, history, title, filename):
