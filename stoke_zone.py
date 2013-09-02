@@ -244,3 +244,8 @@ if __name__ == "__main__":
 
     graph_gameweek_by_team(league_standing, 'stoke_gameweek_by_team.png')
     graph_points_total_at_gameweek(league_standing, 'stoke_total_by_team.png')
+
+    from selenium import webdriver
+    driver = webdriver.PhantomJS()
+    driver.get('stoke_city_fc.html')
+    driver.save_screenshot('stoke_city_fc_stats.png')
