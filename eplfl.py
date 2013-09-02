@@ -133,6 +133,7 @@ class Team(object):
                     start_week = int(m.groups()[0])
         points_history = [0] * (start_week - 1)
         transfer_history = [{'transfers': 0, 'cost': 0}] * (start_week - 1)
+        value_history = [100.0] * (start_week - 1)
         this_season_section = pq('section.ismPrimaryNarrow').children()[0]
         table = this_season_section.find('table')
         if table is not None:
@@ -142,9 +143,14 @@ class Team(object):
                 tm = int(PyQuery(row).find('td.ismCol4').text())
                 tc = int(PyQuery(row).find('td.ismCol5').text())
                 transfer_history.append({'transfers': tm, 'cost': tc})
+                team_value = PyQuery(row).find('td.ismCol6').text().strip()
+                m = re.search('(\d+.\d)m', team_value)
+                tv = float(m.groups()[0])
+                value_history.append(tv)
 
         self._points_history = points_history
         self._transfer_history = transfer_history
+        self._value_history = value_history
         self._manager = unicode(pq('h1.ismSection2').text())
         self._name = unicode(pq('h2.ismSection3').text())
 
@@ -159,6 +165,12 @@ class Team(object):
         if not self._transfer_history:
             self._fill_data_fields()
         return self._transfer_history
+
+    @property
+    def value_history(self):
+        if not self._value_history:
+            self._fill_data_fields()
+        return self._value_history
 
     @property
     def name(self):
