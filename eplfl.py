@@ -247,6 +247,7 @@ class LeagueStanding(object):
         self.league = league
 
         self._points_history = None
+        self._transfer_history = None
         self._points_total_by_gameweek = None
         self._rank_history = None
         self._score_totals = None
@@ -277,14 +278,25 @@ class LeagueStanding(object):
         return self._points_history
 
     @property
+    def transfer_history(self):
+        if not self._transfer_history:
+            transfer_history = {}
+            for team in self.league.teams:
+                transfer_history[team.id] = team.transfer_history
+            self._transfer_history = transfer_history
+        return self._transfer_history
+
+    @property
     def points_total_by_gameweek(self):
         if not self._points_total_by_gameweek:
             points_total_by_gameweek = {}
             for team in self.league.teams:
                 points_total = []
                 total = 0
-                for points in self.points_history[team.id]:
-                    total += points
+                for i in xrange(len(self.points_history[team.id])):
+                    points = self.points_history[team.id][i]
+                    tc = self.transfer_history[team.id][i]['cost']
+                    total += points - tc
                     points_total.append(total)
                 points_total_by_gameweek[team.id] = points_total
             self._points_total_by_gameweek = points_total_by_gameweek
