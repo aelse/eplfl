@@ -5,7 +5,8 @@ import unicodedata
 if __name__ == '__main__':
     """Bottom 10 League Checker"""
     my_league_id = 235981
-    gameweek = 1
+    import sys
+    gameweek = int(sys.argv[1])
 
     permitted_teams = ['Aston Villa', 'Cardiff City', 'Crystal Palace',
                        'Fulham', 'Hull City', 'Norwich', 'Newcastle',
