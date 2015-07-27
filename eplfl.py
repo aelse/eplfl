@@ -128,9 +128,12 @@ class Team(object):
         start_week = 1
         for link in pq('a'):
             if re.match('/my-leagues/', link.get('href')):
-                m = re.match('Gameweek (\d+)', link.text.strip())
-                if m:
-                    start_week = int(m.groups()[0])
+                try:
+                    m = re.match('Gameweek (\d+)', link.text.strip())
+                    if m:
+                        start_week = int(m.groups()[0])
+                except AttributeError:
+                    pass
         points_history = [0] * (start_week - 1)
         transfer_history = [{'transfers': 0, 'cost': 0}] * (start_week - 1)
         value_history = [100.0] * (start_week - 1)
