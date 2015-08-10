@@ -143,10 +143,10 @@ class Team(object):
             for row in table.find('tbody').getchildren():
                 gwp = int(PyQuery(row).find('td.ismCol2').text())
                 points_history.append(gwp)
-                tm = int(PyQuery(row).find('td.ismCol4').text())
-                tc = int(PyQuery(row).find('td.ismCol5').text())
+                tm = int(PyQuery(row).find('td.ismCol5').text())
+                tc = int(PyQuery(row).find('td.ismCol6').text())
                 transfer_history.append({'transfers': tm, 'cost': tc})
-                team_value = PyQuery(row).find('td.ismCol6').text().strip()
+                team_value = PyQuery(row).find('td.ismCol7').text().strip()
                 m = re.search('(\d+.\d)m', team_value)
                 tv = float(m.groups()[0])
                 value_history.append(tv)
